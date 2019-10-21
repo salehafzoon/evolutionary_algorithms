@@ -129,7 +129,9 @@ if __name__ == '__main__':
         generation += 1
 
 
-    print("generation->",generation,"       ",population[0] ,  call_fitness(population[0]))
+    print("generation->",generation,'\t'
+          ,population[0] ,'\t',
+          call_fitness(population[0]))
 
     duration = time.time() - start
     print ("minute:",(duration)//60)

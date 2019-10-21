@@ -17,7 +17,7 @@ CAN_POS = [(0, 0), (1, 1), (2, 2), (3, 3),
           (4, 4), (5, 5), (6, 6), (7, 7),
           (8, 8), (9, 9), (10, 10)]
 
-METHOD = "uniform"
+METHOD = "onePoint"
 
 # target = [(1,1),(2,2),(3,3),(4,4)]
 
@@ -59,14 +59,13 @@ def check_wall_or_can(action):
         else:
             y +=r
     
-        
     if x >10 or x<0 or y>10 or y<0:
         fitness -=5
-    elif (x,y) in CAN_POS:
-        fitness +=10     
+    else:
         CURR_LOC = (x,y)
-        
-        
+        if (x,y) in CAN_POS:
+            fitness +=10     
+            
 def call_fitness(gene):
     fitness = 0
     for action in gene :
@@ -105,21 +104,15 @@ def mutate(child):
     chrom = random.choice(child)
     index = child.index(chrom)
     
-    possible = set(range(1, GRID_WIDTH + 1))
-    coll = True
-    while(coll):
-        coll = False
-        x = random.choice(list(possible))
-        y = random.choice(list(possible))
-
-        for (gx, gy) in child:
-            if (gx == x and gy == y):
-                coll = True
-        if coll == False:
-            child[index] = (x,y)
+    action = random.choice(list(ACTION_LIST))
+    child[index] = action
             
     return child
     
+def rouletteWheelSelection(population):
+    parents = (0,1)
+    
+    return parents
 
 if __name__ == '__main__':
 
@@ -127,50 +120,41 @@ if __name__ == '__main__':
     for i in range(0, POPULATION_SIZE):
         population.append(create_gnome())
 
-    print(population)
-    # while not found:
+    # print(population)
+    while not found:
 
-    #     population = sorted(population, key=lambda gene:call_fitness(gene))
+        population = sorted(population, key=lambda gene:call_fitness(gene))
 
-    #     print("generation:",generation," best fit:",call_fitness(population[0]))
+        print("generation:",generation," best fit:",call_fitness(population[0]))
         
-    #     if call_fitness(population[0]) <= 0:
-    #         found = True
-    #         break
+        if call_fitness(population[0]) <= 0:
+            found = True
+            break
         
-    #     new_generation = []
+        new_generation = []
         
-    #     index = int(POPULATION_SIZE *0.4)
+        index = int(POPULATION_SIZE *0.4)
         
-    #     for _ in range(POPULATION_SIZE):
+        for _ in range(POPULATION_SIZE):
             
-    #         xOverProb = random.random()
+            (parent1 , parent2) = rouletteWheelSelection(population)
+            child = crossOver(parent1,parent2)
             
-    #         parent1 = random.choice(population[:index]) 
-    #         parent2 = random.choice(population[:index]) 
-            
+            mutateProb = random.random()
+            if(mutateProb <= 0.5):
+                mutate(child)
                 
-    #         if(xOverProb > 0.1):    
-    #             child = crossOver(parent1,parent2)
-                
-    #         else:
-    #             child = parent1
-            
-    #         mutateProb = random.random()
-    #         if(mutateProb <= 0.01):
-    #             mutate(child)
-                
-    #         new_generation.append(child) 
+            new_generation.append(child) 
                 
   
-    #     population = new_generation 
-    #     generation += 1
+        population = new_generation 
+        generation += 1
 
 
-    # print("generation->",generation,"       ",population[0] ,  call_fitness(population[0]))
+    print("generation->",generation,"       ",population[0] ,  call_fitness(population[0]))
 
-    # duration = time.time() - start
-    # print ("minute:",(duration)//60)
-    # print("second:" ,(duration)%60)
+    duration = time.time() - start
+    print ("minute:",(duration)//60)
+    print("second:" ,(duration)%60)
 
         
