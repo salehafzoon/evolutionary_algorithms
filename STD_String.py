@@ -7,17 +7,8 @@ generation = 1
 found = False
 population = []
 POPULATION_SIZE = 1000
-MAX_NUMBER = 20
-GRID_WIDTH = 7
 METHOD = "uniform"
-
-target = [(2, 3), (2, 2), (2, 1), (3, 1), 
-          (4, 1), (4, 2), (4, 3), (5, 1),
-          (6, 1), (6, 2), (6, 3), (2, 7),
-          (2, 6), (2, 5), (3, 5), (4, 5),
-          (5, 5), (6, 5), (6, 6), (6, 7)]
-
-# target = [(1,1),(2,2),(3,3),(4,4)]
+target = "salehafzoon9432176"
 
 
 def create_gnome():
