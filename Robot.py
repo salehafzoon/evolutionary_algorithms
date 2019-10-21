@@ -6,7 +6,7 @@ start = time.time()
 generation = 1
 found = False
 population = []
-fitness = 0
+strg_fitness = 0
 
 POPULATION_SIZE = 4
 MAX_NUMBER = 10
@@ -29,54 +29,17 @@ def create_gnome():
         gene.append(action)
 
     return gene
-
-def check_wall_or_can(action,fitness,CURR_LOC):
     
-    (x,y) = CURR_LOC
-    if action =="st":
-        y +=1
-    if action =="n":
-        y +=1
-    elif action =="s":
-        y-=1
-    elif action == "e":
-        x+=1
-    elif action == "w":
-        x-=1
-    elif action == "r":
-        r = 0
-        dec_inc = random.random()
-        if dec_inc>0.5:
-            r = 1
-        else:
-            r = -1
-                
-        hor_or_ver = random.random()
-        if(hor_or_ver > 0.5):
-            x +=r
-        else:
-            y +=r
-    
-    print("x,y",x,y)
-    if x >10 or x<0 or y>10 or y<0:
-        fitness -=5
-    else:
-        CURR_LOC = (x,y)
-        if (x,y) in CAN_POS:
-            CAN_POS.remove((x,y))
-            print("CAN_POS",CAN_POS)
-            fitness +=10  
-       
-    return (fitness,CURR_LOC)
-    
-def call_fitness(gene,CURR_LOC):
+def call_fitness(gene):
+    global CURR_LOC
     fitness = 0
+    
     (x,y) = CURR_LOC
     for action in gene :
             
         if action =="st":
-            pass
-        if action =="n":
+            x=x
+        elif action =="n":
             y +=1
         elif action =="s":
             y-=1
@@ -84,6 +47,10 @@ def call_fitness(gene,CURR_LOC):
             x+=1
         elif action == "w":
             x-=1
+        elif action == "b" and CURR_LOC in CAN_POS:
+            CAN_POS.remove(CURR_LOC)
+            fitness +=10
+        
         elif action == "r":
             r = 0
             dec_inc = random.random()
@@ -98,20 +65,21 @@ def call_fitness(gene,CURR_LOC):
             else:
                 y +=r
         
-        print("x,y",x,y)
+        # print ("\n")
+        # print("before",CURR_LOC)
         
         # check if hit the wall
         if x >10 or x<0 or y>10 or y<0:
             fitness -=5
-        else:
-            CURR_LOC = (x,y)
-            # check if pics the can
-            if action == "b" and (x,y) in CAN_POS:
-                CAN_POS.remove((x,y))
-                fitness +=10  
-        print("fitness :",fitness)
+            x = max(0,x)
+            y = max(0,x)
+            
+        
+        CURR_LOC = (x,y)
+        
+        # print("action:",action,"fitness :",fitness,"after",CURR_LOC)
          
-    return (fitness,CURR_LOC)
+    return fitness
 
 def crossOver(parent1, parent2):
     child = []
@@ -140,34 +108,69 @@ def mutate(child):
             
     return child
     
-def rouletteWheelSelection(population,CURR_LOC):
+def rouletteWheelSelection(population):
+    
     fitness_sum = 0
     members = []
+    parents = []
+    min_fit = 0
     for individual in population:
-        fitness = call_fitness(individual,CURR_LOC)
+        fitness = call_fitness(individual)
+        if fitness <min_fit:
+            min_fit = fitness
         fitness_sum +=fitness
         members.append((individual,fitness))
     
+    print("min_fit",min_fit)
+    min_fit =- min_fit
+    fitness_sum += min_fit * len(population)
+    print("fitness_sum",fitness_sum)
+    filled = 0
+        
     for member in members:
-        member = (individual , fitness *100/fitness_sum)
+        (individual,fitness) = member
+        fitness = min_fit + filled + fitness /fitness_sum
+        filled = fitness
+        
+        member = (individual , fitness)
     
     
+    print("members",members)
     
-    parents = (0,1)
-    
+    for i in range(2):
+        pointer = random.random()
+        
+        print("pointer",pointer)
+        
+        for member in members:
+            (individual,fitness) = member
+            
+            if pointer < fitness:
+                print("selected",individual)
+                parents.append(individual)
+                break
+                
     return parents
 
 if __name__ == '__main__':
 
-    print("First Position : ",CURR_LOC)
-    # First Generation
-    for i in range(0, POPULATION_SIZE):
+
+    for i in range(4):
         population.append(create_gnome())
 
-    population[0] = ['st', 'r', 'r', 'e', 'w', 'n', 'e', 's', 'n', 'st']
-    print(population[0])
+    parents = rouletteWheelSelection(population)
     
-    print(call_fitness(population[0],CURR_LOC))
+             
+    # print("First Position : ",CURR_LOC)
+    # # First Generation
+    # for i in range(0, POPULATION_SIZE):
+    #     population.append(create_gnome())
+
+    # population[0] = ['b', 'r', 'r', 's', 'b', 'e', 'b', 'n', 'b', 'w','b','r','b']
+    # print(population[0])
+    
+    # print("total fitness:",call_fitness(population[0]))
+    
     
     # while not found:
 
