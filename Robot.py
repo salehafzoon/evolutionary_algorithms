@@ -132,13 +132,16 @@ def rouletteWheelSelection(population):
     
     filled = 0
         
+    temp = []
     for i in range(len(fitnesses)) :
         
-        fitnesses[i] =  float(filled + fitnesses[i] /fitness_sum)   
+        fitnesses[i] =  float(filled + fitnesses[i] /fitness_sum)  
+        temp.append(fitnesses[i])
         filled = fitnesses[i]
     
         
     print("fitnesses",fitnesses)
+    print("temp",temp)
     
     for j in range(2):
         pointer = random.random()

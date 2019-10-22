@@ -1,129 +1,129 @@
 import random
 import time
 import math
+import string
 
 start = time.time()
 generation = 1
 found = False
 population = []
-POPULATION_SIZE = 1000
-METHOD = "uniform"
-target = "salehafzoon9432176"
+POPULATION_SIZE = 200
+METHOD = "onePoint"
+TARGET = "salehafzoon9432176"
 
 
 def create_gnome():
-    gene = []
-    possible = set(range(1, GRID_WIDTH + 1))
+    gene = ""
+    possible = list(string.ascii_lowercase)
+    for i in range(10):
+        possible.append(i)
 
-    for i in range(1, MAX_NUMBER + 1):
-        coll = True
-        while(coll):
-            coll = False
-            x = random.choice(list(possible))
-            y = random.choice(list(possible))
-
-            for (gx, gy) in gene:
-                if (gx == x and gy == y):
-                    coll = True
-            if coll == False:
-                gene.append((x, y))
+    for i in range(len(TARGET)):
+        gene += str(random.choice(possible))
 
     return gene
 
 def call_fitness(gene):
     fitness = 0
-    for (gx, gy), (tx, ty) in zip(gene, target):
-        fitness += math.sqrt(abs(gx - tx) + abs(gy - ty))
+    for x , y in zip(list(gene), list(TARGET)):
+        fitness += abs(ord(x)-ord(y))
 
     return fitness
 
 def crossOver(parent1, parent2):
-    child = []
+    child = ""
     if METHOD == "uniform":
-        for c1 , c2 in zip(parent1 , parent2):
+        for c1 , c2 in zip(list(parent1) , list(parent2)):
             prob = random.random()
             if(prob > 0.5):
-                child.append(c1)
+                child += c1
             else:
-                child.append(c2)
+                child += c2
     
     if METHOD == "onePoint":
-        size = len(parent1)
+        
+        size = len(list(parent1))
         child = parent1[:size/2]
-        for i in range(size/2,size):
-            child.append(parent2[i])
+        child = child +parent2[size/2:]
         
     return child
         
 def mutate(child):
-    chrom = random.choice(child)
-    index = child.index(chrom)
-    
-    possible = set(range(1, GRID_WIDTH + 1))
-    coll = True
-    while(coll):
-        coll = False
-        x = random.choice(list(possible))
-        y = random.choice(list(possible))
+    possible = list(string.ascii_lowercase)
+    for i in range(10):
+        possible.append(i)
 
-        for (gx, gy) in child:
-            if (gx == x and gy == y):
-                coll = True
-        if coll == False:
-            child[index] = (x,y)
-            
+    index = int(random.random()* len(child))
+    
+    child="".join((child[:index],str(random.choice(possible)),child[index+1:]))
+           
     return child
     
 
 if __name__ == '__main__':
 
+    x = create_gnome()
+    y = create_gnome()
+    
+    print(x)
+    print(len(x))
+    print(len(TARGET))
+    print(call_fitness(x))
+    
+    child = crossOver(x,y)
+    print(child)
+    
+    print(mutate(child))
+    
+    
+    
     # First Generation
-    for i in range(0, POPULATION_SIZE):
-        population.append(create_gnome())
+    # for i in range(0, POPULATION_SIZE):
+    #     population.append(create_gnome())
 
-    while not found:
+    # while not found:
 
-        population = sorted(population, key=lambda gene:call_fitness(gene))
+    #     population = sorted(population, key=lambda gene:call_fitness(gene))
 
-        print("generation:",generation," best fit:",call_fitness(population[0]))
+    #     print("generation:",generation," best fit:",call_fitness(population[0]))
         
-        if call_fitness(population[0]) <= 0:
-            found = True
-            break
+    #     if call_fitness(population[0]) <= 0:
+    #         found = True
+    #         break
         
-        new_generation = []
+    #     new_generation = []
         
-        index = int(POPULATION_SIZE *0.4)
+    #     index = int(POPULATION_SIZE *0.4)
         
-        for _ in range(POPULATION_SIZE):
+    #     for _ in range(POPULATION_SIZE):
             
-            xOverProb = random.random()
+    #         xOverProb = random.random()
             
-            parent1 = random.choice(population[:index]) 
-            parent2 = random.choice(population[:index]) 
+    #         parent1 = random.choice(population[:index]) 
+    #         parent2 = random.choice(population[:index]) 
             
                 
-            if(xOverProb > 0.1):    
-                child = crossOver(parent1,parent2)
+    #         if(xOverProb > 0.1):    
+    #             child = crossOver(parent1,parent2)
                 
-            else:
-                child = parent1
+    #         else:
+    #             child = parent1
             
-            mutateProb = random.random()
-            if(mutateProb <= 0.01):
-                mutate(child)
+    #         mutateProb = random.random()
+    #         if(mutateProb <= 0.01):
+    #             mutate(child)
                 
-            new_generation.append(child) 
+    #         new_generation.append(child) 
                 
   
-        population = new_generation 
-        generation += 1
+    #     population = new_generation 
+    #     generation += 1
 
 
-    print("generation->",generation,"       ",population[0] ,  call_fitness(population[0]))
+    # print("generation->",generation,"       ",population[0] ,  call_fitness(population[0]))
 
-    duration = time.time() - start
-    print ("minute:",(duration)//60)
-    print("second:" ,(duration)%60)
+    # duration = time.time() - start
+    # print ("minute:",(duration)//60)
+    # print("second:" ,(duration)%60)
 
         
