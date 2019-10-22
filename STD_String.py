@@ -7,8 +7,8 @@ start = time.time()
 generation = 1
 found = False
 population = []
-POPULATION_SIZE = 200
-METHOD = "onePoint"
+POPULATION_SIZE = 10000
+METHOD = "uniform"
 TARGET = "salehafzoon9432176"
 
 
@@ -62,68 +62,54 @@ def mutate(child):
 
 if __name__ == '__main__':
 
-    x = create_gnome()
-    y = create_gnome()
-    
-    print(x)
-    print(len(x))
-    print(len(TARGET))
-    print(call_fitness(x))
-    
-    child = crossOver(x,y)
-    print(child)
-    
-    print(mutate(child))
-    
-    
     
     # First Generation
-    # for i in range(0, POPULATION_SIZE):
-    #     population.append(create_gnome())
+    for i in range(0, POPULATION_SIZE):
+        population.append(create_gnome())
 
-    # while not found:
+    while not found:
 
-    #     population = sorted(population, key=lambda gene:call_fitness(gene))
+        population = sorted(population, key=lambda gene:call_fitness(gene))
 
-    #     print("generation:",generation," best fit:",call_fitness(population[0]))
+        print("generation:",generation," best fit:",call_fitness(population[0]))
         
-    #     if call_fitness(population[0]) <= 0:
-    #         found = True
-    #         break
+        if call_fitness(population[0]) <= 0:
+            found = True
+            break
         
-    #     new_generation = []
+        new_generation = []
         
-    #     index = int(POPULATION_SIZE *0.4)
+        index = int(POPULATION_SIZE *0.4)
         
-    #     for _ in range(POPULATION_SIZE):
+        for _ in range(POPULATION_SIZE):
             
-    #         xOverProb = random.random()
+            xOverProb = random.random()
             
-    #         parent1 = random.choice(population[:index]) 
-    #         parent2 = random.choice(population[:index]) 
+            parent1 = random.choice(population[:index]) 
+            parent2 = random.choice(population[:index]) 
             
                 
-    #         if(xOverProb > 0.1):    
-    #             child = crossOver(parent1,parent2)
+            if(xOverProb > 0.1):    
+                child = crossOver(parent1,parent2)
                 
-    #         else:
-    #             child = parent1
+            else:
+                child = parent1
             
-    #         mutateProb = random.random()
-    #         if(mutateProb <= 0.01):
-    #             mutate(child)
+            mutateProb = random.random()
+            if(mutateProb <= 0.01):
+                mutate(child)
                 
-    #         new_generation.append(child) 
+            new_generation.append(child) 
                 
   
-    #     population = new_generation 
-    #     generation += 1
+        population = new_generation 
+        generation += 1
 
 
-    # print("generation->",generation,"       ",population[0] ,  call_fitness(population[0]))
+    print("generation->",generation,"       ",population[0] ,  call_fitness(population[0]))
 
-    # duration = time.time() - start
-    # print ("minute:",(duration)//60)
-    # print("second:" ,(duration)%60)
+    duration = time.time() - start
+    print ("minute:",(duration)//60)
+    print("second:" ,(duration)%60)
 
         
