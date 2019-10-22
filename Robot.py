@@ -111,43 +111,45 @@ def mutate(child):
 def rouletteWheelSelection(population):
     
     fitness_sum = 0
-    members = []
     parents = []
-    min_fit = 0
-    for individual in population:
-        fitness = call_fitness(individual)
-        if fitness <min_fit:
-            min_fit = fitness
-        fitness_sum +=fitness
-        members.append((individual,fitness))
+    min_fit = -1000
+    fitnesses = []
     
-    print("min_fit",min_fit)
-    min_fit =- min_fit
-    fitness_sum += min_fit * len(population)
-    print("fitness_sum",fitness_sum)
+    
+    for individual in population:
+        fitnesses.append(call_fitness(individual))
+    
+    min_fit = abs(min(fitnesses))
+
+    print("fitnesses",fitnesses,"fitness_sum",fitness_sum)
+    
+    for i in range(len(fitnesses)):
+        fitnesses[i] += min_fit +10
+        
+    fitness_sum = sum(fitnesses)
+    
+    print("fitnesses",fitnesses,"fitness_sum",fitness_sum)
+    
     filled = 0
         
-    for member in members:
-        (individual,fitness) = member
-        fitness = min_fit + filled + fitness /fitness_sum
-        filled = fitness
+    for i in range(len(fitnesses)) :
         
-        member = (individual , fitness)
+        fitnesses[i] =  float(filled + fitnesses[i] /fitness_sum)   
+        filled = fitnesses[i]
     
+        
+    print("fitnesses",fitnesses)
     
-    print("members",members)
-    
-    for i in range(2):
+    for j in range(2):
         pointer = random.random()
         
         print("pointer",pointer)
         
-        for member in members:
-            (individual,fitness) = member
+        for i in range(len(fitnesses)):
             
-            if pointer < fitness:
-                print("selected",individual)
-                parents.append(individual)
+            if pointer < fitnesses[i]:
+                print("selected",population[i])
+                parents.append(population[i])
                 break
                 
     return parents
