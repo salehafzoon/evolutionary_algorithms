@@ -6,18 +6,17 @@ start = time.time()
 generation = 1
 found = False
 population = []
-POPULATION_SIZE = 200
+POPULATION_SIZE = 250
 MAX_NUMBER = 20
 GRID_WIDTH = 7
-METHOD = "uniform"
+MAX_GENERATION = 4000
+METHOD = "onePoint"
 
 target = [(2, 3), (2, 2), (2, 1), (3, 1), 
           (4, 1), (4, 2), (4, 3), (5, 1),
           (6, 1), (6, 2), (6, 3), (2, 7),
           (2, 6), (2, 5), (3, 5), (4, 5),
           (5, 5), (6, 5), (6, 6), (6, 7)]
-
-# target = [(1,1),(2,2),(3,3),(4,4)]
 
 
 def create_gnome():
@@ -40,6 +39,7 @@ def create_gnome():
     return gene
 
 def call_fitness(gene):
+    # Euclidean distance between gene and target
     fitness = 0
     for (gx, gy), (tx, ty) in zip(gene, target):
         fitness += math.sqrt(abs(gx - tx) + abs(gy - ty))
@@ -91,7 +91,13 @@ if __name__ == '__main__':
         population.append(create_gnome())
 
     while not found:
-
+        
+        # max generation terminate condition
+        if generation > MAX_GENERATION:
+            print("---- can't find ----")
+            break
+        
+        #sort generation for parent selection
         population = sorted(population, key=lambda gene:call_fitness(gene))
 
         print("generation:",generation," best fit:",call_fitness(population[0]))
@@ -102,7 +108,8 @@ if __name__ == '__main__':
         
         new_generation = []
         
-        index = int(POPULATION_SIZE*0.4)
+        #selection pressure with coefficient 70% of best
+        index = int(POPULATION_SIZE*0.7)
         
         for _ in range(POPULATION_SIZE):
             
@@ -111,15 +118,16 @@ if __name__ == '__main__':
             parent1 = random.choice(population[:index]) 
             parent2 = random.choice(population[:index]) 
             
-                
+            # cross overing with probability 90%
             if(xOverProb > 0.1):    
                 child = crossOver(parent1,parent2)
                 
             else:
                 child = parent1
             
+            # muteting with probability 0.1%
             mutateProb = random.random()
-            if(mutateProb <= 0.01):
+            if(mutateProb <= 0.001):
                 mutate(child)
                 
             new_generation.append(child) 
@@ -129,9 +137,11 @@ if __name__ == '__main__':
         generation += 1
 
 
-    print("generation->",generation,'\t'
-          ,population[0] ,'\t',
-          call_fitness(population[0]))
+    if found:
+
+        print("generation->",generation,'\t'
+            ,population[0] ,'\t',
+            call_fitness(population[0]))
 
     duration = time.time() - start
     print ("minute:",(duration)//60)

@@ -8,10 +8,9 @@ found = False
 population = []
 strg_fitness = 0
 
-POPULATION_SIZE = 600
+POPULATION_SIZE = 240
 MAX_NUMBER = 243
 ACTION_LIST = ["n","s","e","w","r","st","b"]
-# ACTION_LIST = ["n","s","e","w","b"]
 GRID_WIDTH = 10
 CURR_LOC = (5,5)
 CAN_POS = []
@@ -34,7 +33,6 @@ class Individual(object):
             
         return gene
   
-     
     @classmethod
     def rouletteWheelSelection(self,population):
         
@@ -185,7 +183,7 @@ if __name__ == '__main__':
         
         new_generation = []
         
-        index = int(POPULATION_SIZE* 0.3)
+        index = int(POPULATION_SIZE* 0.8)
             
         for _ in range(POPULATION_SIZE):
             
