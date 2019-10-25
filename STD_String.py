@@ -112,7 +112,7 @@ if __name__ == '__main__':
         generation += 1
 
     if found:
-        print("generation->",generation,"       ",
+        print("generation : ",generation,"       ",
               population[0] ,  call_fitness(population[0]))
 
     duration = time.time() - start

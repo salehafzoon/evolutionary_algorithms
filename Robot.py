@@ -191,7 +191,7 @@ if __name__ == '__main__':
         generation += 1
 
     if found:
-        print("generation->",generation,"       ",
+        print("generation : ",generation,"       ",
               population[0].chromosome[0:10] ,  population[0].fitness)
 
     duration = time.time() - start

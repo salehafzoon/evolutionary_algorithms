@@ -6,10 +6,10 @@ start = time.time()
 generation = 1
 found = False
 population = []
-POPULATION_SIZE = 250
+POPULATION_SIZE = 400
 MAX_NUMBER = 20
 GRID_WIDTH = 7
-MAX_GENERATION = 6000
+MAX_GENERATION = 4000
 METHOD = "uniform"
 
 target = [(2, 3), (2, 2), (2, 1), (3, 1), 
@@ -139,9 +139,8 @@ if __name__ == '__main__':
 
     if found:
 
-        print("generation->",generation,'\t'
-            ,population[0] ,'\t',
-            call_fitness(population[0]))
+        print("generation : ",generation
+            ,population[0],call_fitness(population[0]))
 
     duration = time.time() - start
     print ("minute:",(duration)//60)
