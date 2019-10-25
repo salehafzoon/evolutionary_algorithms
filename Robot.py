@@ -14,7 +14,6 @@ GRID_WIDTH = 10
 CURR_LOC = (5,5)
 CAN_POS = []
 MAX_GENERATION = 1000
-
 METHOD = "onePoint"
   
 class Individual(object):
@@ -147,7 +146,7 @@ if __name__ == '__main__':
     
     for i in range(2):
         for j in range(2):
-            CAN_POS.append((i,j))  
+            CAN_POS.append((i,j)) 
     
     # First Generation    
     for _ in range(POPULATION_SIZE): 

@@ -7,9 +7,10 @@ start = time.time()
 generation = 1
 found = False
 population = []
-POPULATION_SIZE = 250
+POPULATION_SIZE = 900
+MAX_GENERATION = 300
 METHOD = "uniform"
-TARGET = "salehafzoon9432176"
+TARGET = "salehafzoon9831678"
 
 
 def create_gnome():
@@ -69,6 +70,11 @@ if __name__ == '__main__':
 
     while not found:
 
+        # max generation terminate condition
+        if generation > MAX_GENERATION:
+            print("---- can't find ----")
+            break
+        
         population = sorted(population, key=lambda gene:call_fitness(gene))
 
         print("generation:",generation," best fit:",call_fitness(population[0]))
@@ -79,7 +85,7 @@ if __name__ == '__main__':
         
         new_generation = []
         
-        index = int(POPULATION_SIZE *0.4)
+        index = int(POPULATION_SIZE *0.7)
         
         for _ in range(POPULATION_SIZE):
             
@@ -105,8 +111,9 @@ if __name__ == '__main__':
         population = new_generation 
         generation += 1
 
-
-    print("generation->",generation,"       ",population[0] ,  call_fitness(population[0]))
+    if found:
+        print("generation->",generation,"       ",
+              population[0] ,  call_fitness(population[0]))
 
     duration = time.time() - start
     print ("minute:",(duration)//60)
