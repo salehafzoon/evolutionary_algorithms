@@ -6,16 +6,16 @@ start = time.time()
 generation = 1
 found = False
 population = []
-strg_fitness = 0
 
-POPULATION_SIZE = 240
+POPULATION_SIZE = 300
 MAX_NUMBER = 243
 ACTION_LIST = ["n","s","e","w","r","st","b"]
 GRID_WIDTH = 10
 CURR_LOC = (5,5)
 CAN_POS = []
+MAX_GENERATION = 1000
 
-METHOD = "uniform"
+METHOD = "onePoint"
   
 class Individual(object):
       
@@ -46,35 +46,23 @@ class Individual(object):
         
         min_fit = abs(min(fitnesses))
 
-        # print("fitnesses",fitnesses)
-        
         for i in range(len(fitnesses)):
             fitnesses[i] += min_fit +10
             
-        fitness_sum = sum(fitnesses)
-        
-        # print("fitnesses",fitnesses,"fitness_sum",fitness_sum)
-        
+        fitness_sum = sum(fitnesses)        
         filled = 0
             
         for i in range(len(fitnesses)) :
             
             fitnesses[i] = float(filled + fitnesses[i] /float(fitness_sum))
             filled = fitnesses[i]
-        
-            
-        # print("fitnesses",fitnesses)
-        # print("population",population)
-        
+    
         for j in range(2):
             pointer = random.random()
-            
-            # print("pointer",pointer)
-            
+                    
             for i in range(len(fitnesses)):
                 
                 if pointer < fitnesses[i]:
-                    # print("selected",population[i])
                     parents.append(population[i])
                     break
                     
@@ -171,11 +159,14 @@ if __name__ == '__main__':
 
     while not found:
         
+        # max generation terminate condition
+        if generation > MAX_GENERATION:
+            print("---- can't find ----")
+            break
+        
         population = sorted(population, reverse = True,key = lambda x:x.fitness)
         
-        print("generation:",generation," best fit:",population[0].fitness,"others:",
-              population[1].fitness,population[2].fitness,population[3].fitness,
-              population[4].fitness,population[5].fitness,population[6].fitness)
+        print("generation:",generation," best fit:",population[0].fitness)
         
         if population[0].fitness == len(CAN_POS)* 10:
             found = True
@@ -183,10 +174,12 @@ if __name__ == '__main__':
         
         new_generation = []
         
-        index = int(POPULATION_SIZE* 0.8)
+        #selection pressure with coefficient 70% of best
+        index = int(POPULATION_SIZE* 0.7)
             
         for _ in range(POPULATION_SIZE):
             
+            #parent selection with Roulette Wheel method
             (parent1 , parent2) = Individual.rouletteWheelSelection(population[:index])
             child = parent1.crossOver(parent2)
             
@@ -198,8 +191,9 @@ if __name__ == '__main__':
         population = new_generation 
         generation += 1
 
-
-    print("generation->",generation,"       ",population[0].chromosome ,  population[0].fitness)
+    if found:
+        print("generation->",generation,"       ",
+              population[0].chromosome[0:10] ,  population[0].fitness)
 
     duration = time.time() - start
     print ("minute:",(duration)//60)

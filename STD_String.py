@@ -7,7 +7,7 @@ start = time.time()
 generation = 1
 found = False
 population = []
-POPULATION_SIZE = 10000
+POPULATION_SIZE = 250
 METHOD = "uniform"
 TARGET = "salehafzoon9432176"
 

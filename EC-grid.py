@@ -9,8 +9,8 @@ population = []
 POPULATION_SIZE = 250
 MAX_NUMBER = 20
 GRID_WIDTH = 7
-MAX_GENERATION = 4000
-METHOD = "onePoint"
+MAX_GENERATION = 6000
+METHOD = "uniform"
 
 target = [(2, 3), (2, 2), (2, 1), (3, 1), 
           (4, 1), (4, 2), (4, 3), (5, 1),
