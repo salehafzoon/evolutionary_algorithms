@@ -6,7 +6,7 @@ start = time.time()
 generation = 1
 found = False
 population = []
-POPULATION_SIZE = 1000
+POPULATION_SIZE = 200
 MAX_NUMBER = 20
 GRID_WIDTH = 7
 METHOD = "uniform"
@@ -102,7 +102,7 @@ if __name__ == '__main__':
         
         new_generation = []
         
-        index = int(POPULATION_SIZE *0.4)
+        index = int(POPULATION_SIZE*0.4)
         
         for _ in range(POPULATION_SIZE):
             

@@ -8,7 +8,7 @@ found = False
 population = []
 strg_fitness = 0
 
-POPULATION_SIZE = 5000
+POPULATION_SIZE = 600
 MAX_NUMBER = 243
 ACTION_LIST = ["n","s","e","w","r","st","b"]
 # ACTION_LIST = ["n","s","e","w","b"]
@@ -16,7 +16,7 @@ GRID_WIDTH = 10
 CURR_LOC = (5,5)
 CAN_POS = []
 
-METHOD = "onePoint"
+METHOD = "uniform"
   
 class Individual(object):
       
@@ -159,8 +159,8 @@ class Individual(object):
 
 if __name__ == '__main__':
     
-    for i in range(10):
-        for j in range(10):
+    for i in range(2):
+        for j in range(2):
             CAN_POS.append((i,j))  
     
     # First Generation    
@@ -175,7 +175,9 @@ if __name__ == '__main__':
         
         population = sorted(population, reverse = True,key = lambda x:x.fitness)
         
-        print("generation:",generation," best fit:",population[0].fitness)
+        print("generation:",generation," best fit:",population[0].fitness,"others:",
+              population[1].fitness,population[2].fitness,population[3].fitness,
+              population[4].fitness,population[5].fitness,population[6].fitness)
         
         if population[0].fitness == len(CAN_POS)* 10:
             found = True
@@ -183,11 +185,11 @@ if __name__ == '__main__':
         
         new_generation = []
         
-        index = int(POPULATION_SIZE *0.7)
+        index = int(POPULATION_SIZE* 0.3)
             
         for _ in range(POPULATION_SIZE):
             
-            (parent1 , parent2) = Individual.rouletteWheelSelection(population[index:])
+            (parent1 , parent2) = Individual.rouletteWheelSelection(population[:index])
             child = parent1.crossOver(parent2)
             
             child.mutate()
