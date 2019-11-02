@@ -158,8 +158,9 @@ if __name__ == '__main__':
 
         print("generation : ", generation,
               population[0], call_fitness(population[0]))
-
+        plotResult()
+        
     duration = time.time() - start
     print("minute:", (duration)//60)
     print("second:", (duration) % 60)
-    plotResult()
+    
