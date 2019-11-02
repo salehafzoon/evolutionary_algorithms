@@ -2,11 +2,16 @@ import random
 import time
 import math
 import string
+import matplotlib.pyplot as plt
+import numpy as np
 
 start = time.time()
 generation = 1
 found = False
 population = []
+avg_fits = []
+best_fits = []
+
 POPULATION_SIZE = 900
 MAX_GENERATION = 300
 METHOD = "uniform"
@@ -61,6 +66,14 @@ def mutate(child):
     return child
     
 
+def plotResult():
+    plt.plot(list(range(generation)), best_fits,'go-', label='best of generations', linewidth=2)
+    plt.show()
+
+    plt.plot(list(range(generation)), avg_fits,'bo-', label='avg of generations', linewidth=2)
+    plt.show()
+
+
 if __name__ == '__main__':
 
     
@@ -76,6 +89,9 @@ if __name__ == '__main__':
             break
         
         population = sorted(population, key=lambda gene:call_fitness(gene))
+
+        best_fits.append(call_fitness(population[0]))
+        avg_fits.append(np.mean([call_fitness(p) for p in population]))
 
         print("generation:",generation," best fit:",call_fitness(population[0]))
         
@@ -114,9 +130,9 @@ if __name__ == '__main__':
     if found:
         print("generation : ",generation,"       ",
               population[0] ,  call_fitness(population[0]))
-
+        plotResult()
+    
     duration = time.time() - start
     print ("minute:",(duration)//60)
     print("second:" ,(duration)%60)
-
         
