@@ -12,7 +12,8 @@ best_fits = []
 avg_fits = []
 points = []
 
-POPULATION_SIZE = 3
+POPULATION_SIZE = 100
+TOURNAMENT_SIZE = 10
 MAX_GENERATION = 1000
 METHOD = "onePoint"
 
@@ -67,8 +68,14 @@ class Individual(object):
 
     @classmethod
     def tournomentSelection(self, population):
+        tournament = []
+        for _ in range(TOURNAMENT_SIZE):
+            tournament.append(random.choice(population))
 
-        return population
+        tournament = sorted(tournament, reverse=True,
+                            key=lambda ch: ch.fitness)
+
+        return (tournament[0], tournament[1])
 
     def mutate(self):
         # for chrom in self.chromosome:
@@ -136,7 +143,7 @@ if __name__ == '__main__':
         for y in range(GRID_SIZE):
             points.append((x, y))
 
-    gene = [(2, 0, 0), (2, 3, 3)]
+    gene = [(2, 0, 0), (2, 3, 3), (0, 0, 0), (0, 0, 0)]
     indiv = Individual(gene)
 
     # # First Generation
