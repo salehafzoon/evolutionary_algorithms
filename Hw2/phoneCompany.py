@@ -3,6 +3,7 @@ import time
 import math
 import matplotlib.pyplot as plt
 import numpy as np
+import turtle
 
 start = time.time()
 generation = 1
@@ -15,17 +16,48 @@ points = []
 best_answer = 0
 limit = 0
 
-POPULATION_SIZE = 100
+POPULATION_SIZE = 400
 TOURNAMENT_SIZE = 10
 MAX_GENERATION = 1000
-MAX_LIMIT = 40
+MAX_LIMIT = 10
 METHOD = "onePoint"
 
 GRID_SIZE = 20
-S = 10           # maximum number of antennas
+S = 5           # maximum number of antennas
 K = 3           # anten types
 COSTS = [0, 2, 5, 10]
 RADIUS = [0, 2, 5, 10]
+
+COLORS = ['red', 'blue', 'green', 'purple', 'orange']
+SCALE = 10
+X = -10
+Y = -10
+
+
+def drawAnswer():
+
+    t = turtle.Turtle()
+    # t.penup()
+    # t.setpos(X * SCALE, Y * SCALE)
+    # t.pendown()
+    t.forward(GRID_SIZE * SCALE)  # Forward turtle by 100 units
+    t.left(90)  # Turn turtle by 90 degree
+    t.forward(GRID_SIZE * SCALE)
+    t.left(90)
+    t.forward(GRID_SIZE * SCALE)
+    t.left(90)
+    t.forward(GRID_SIZE * SCALE)
+    t.left(90)
+
+    for (a, x, y) in population[0].gene:
+        clr = random.choice(COLORS)
+        t.color(clr)
+        t.penup()
+        t.setpos(x * SCALE, y * SCALE)
+        t.pendown()
+        t.circle(a * SCALE)
+
+    input()
 
 
 def plotResult():
@@ -78,7 +110,7 @@ class Individual(object):
         for chrom in self.gene:
             mutateProb = random.random()
             (a, x, y) = chrom
-            if(mutateProb <= 0.05):
+            if(mutateProb <= 0.):
                 index = self.gene.index(chrom)
                 mutateProb = random.random()
                 if(mutateProb <= 0.33):
@@ -200,6 +232,8 @@ if __name__ == '__main__':
     generation -= 1
     print("generation : ", generation, "       ",
           population[0].gene[0:10],  population[0].fitness)
+
+    drawAnswer()
 
     plotResult()
 
