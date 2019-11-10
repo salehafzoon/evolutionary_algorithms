@@ -18,14 +18,24 @@ limit = 0
 POPULATION_SIZE = 100
 TOURNAMENT_SIZE = 10
 MAX_GENERATION = 1000
-MAX_LIMIT = 10
+MAX_LIMIT = 40
 METHOD = "onePoint"
 
-GRID_SIZE = 50
+GRID_SIZE = 20
 S = 10           # maximum number of antennas
 K = 3           # anten types
-COSTS = [0, 10, 20, 30]
-RADIUS = [0, 10, 20, 30]
+COSTS = [0, 2, 5, 10]
+RADIUS = [0, 2, 5, 10]
+
+
+def plotResult():
+    plt.plot(list(range(generation)), best_fits, 'go-',
+             label='best of generations', linewidth=2)
+    plt.show()
+
+    plt.plot(list(range(generation)), avg_fits, 'bo-',
+             label='avg of generations', linewidth=2)
+    plt.show()
 
 
 class Individual(object):
@@ -137,7 +147,6 @@ if __name__ == '__main__':
         for y in range(GRID_SIZE):
             points.append((x, y))
 
-
     # First Generation
     for _ in range(POPULATION_SIZE):
         gnome = Individual.create_gnome()
@@ -155,6 +164,7 @@ if __name__ == '__main__':
         if best_answer == population[0].fitness:
             limit += 1
         else:
+            limit = 0
             best_answer = population[0].fitness
 
         best_fits.append(population[0].fitness)
@@ -187,10 +197,11 @@ if __name__ == '__main__':
         population = new_generation
         generation += 1
 
-    print("generation : ", generation-1, "       ",
+    generation -= 1
+    print("generation : ", generation, "       ",
           population[0].gene[0:10],  population[0].fitness)
 
-    # plotResult()
+    plotResult()
 
     duration = time.time() - start
     print("minute:", (duration)//60)
