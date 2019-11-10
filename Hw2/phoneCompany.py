@@ -1,43 +1,31 @@
 import random
 import time
 import math
-# import matplotlib.pyplot as plt
-# import numpy as np
+import matplotlib.pyplot as plt
+import numpy as np
 
 start = time.time()
 generation = 1
 found = False
 population = []
+besstParent = None
 best_fits = []
 avg_fits = []
 points = []
+best_answer = 0
+limit = 0
 
 POPULATION_SIZE = 100
 TOURNAMENT_SIZE = 10
 MAX_GENERATION = 1000
+MAX_LIMIT = 10
 METHOD = "onePoint"
 
-GRID_SIZE = 4
-# maximum number of antennas
-S = 4
-# anten types
-K = 4
-COSTS = [0, 1, 2, 3]
-RADIUS = [0, 1, 2, 3]
-
-
-# u(x) = number of covered points in grid for individual x
-# p(x) = set of installed antennas for individual x
-# t(j) = type of antenna j
-
-# Tournament selection
-
-# Random initialization of each integer value. Only valid triples.
-# 5% mutation probability. Randomly set one of the elements of the triple.
-
-# One-point crossover
-
-# 1% elitism. Replace worst offspring with best parent in the next generation.
+GRID_SIZE = 50
+S = 10           # maximum number of antennas
+K = 3           # anten types
+COSTS = [0, 10, 20, 30]
+RADIUS = [0, 10, 20, 30]
 
 
 class Individual(object):
@@ -68,44 +56,49 @@ class Individual(object):
 
     @classmethod
     def tournomentSelection(self, population):
-        tournament = []
+        best = None
         for _ in range(TOURNAMENT_SIZE):
-            tournament.append(random.choice(population))
+            indiv = random.choice(population)
+            if (best == None) or indiv.fitness > best.fitness:
+                best = indiv
 
-        tournament = sorted(tournament, reverse=True,
-                            key=lambda ch: ch.fitness)
-
-        return (tournament[0], tournament[1])
+        return (best)
 
     def mutate(self):
-        # for chrom in self.chromosome:
-        #     mutateProb = random.random()
-        #     if(mutateProb <= 0.005):
-        #         index = self.chromosome.index(chrom)
-        #         action = random.choice(list(ACTION_LIST))
-        #         self.chromosome[index] = action
+        for chrom in self.gene:
+            mutateProb = random.random()
+            (a, x, y) = chrom
+            if(mutateProb <= 0.05):
+                index = self.gene.index(chrom)
+                mutateProb = random.random()
+                if(mutateProb <= 0.33):
+                    a = random.choice(list(range(K))) + 1
+                elif(mutateProb <= 0.66):
+                    x = random.choice(list(range(GRID_SIZE)))
+                else:
+                    y = random.choice(list(range(GRID_SIZE)))
+
+                self.gene[index] = (a, x, y)
         return
 
     def crossOver(self, parent2):
 
-        # child = []
-        # if METHOD == "uniform":
-        #     for c1, c2 in zip(self.chromosome, parent2.chromosome):
-        #         prob = random.random()
-        #         if(prob > 0.5):
-        #             child.append(c1)
-        #         else:
-        #             child.append(c2)
+        child = []
+        if METHOD == "uniform":
+            for c1, c2 in zip(self.gene, parent2.gene):
+                prob = random.random()
+                if(prob > 0.5):
+                    child.append(c1)
+                else:
+                    child.append(c2)
 
-        # if METHOD == "onePoint":
-        #     size = len(self.chromosome)
-        #     child = self.chromosome[:size/2]
-        #     for i in range(size/2, size):
-        #         child.append(parent2.chromosome[i])
+        if METHOD == "onePoint":
+            size = len(self.gene)
+            child = self.gene[:int(size/2)]
+            for i in range(int(size/2), size):
+                child.append(parent2.gene[i])
 
-        # return Individual(child)
-
-        return
+        return Individual(child)
 
     def u(self):
 
@@ -114,15 +107,16 @@ class Individual(object):
 
         self.gene = sorted(self.gene, reverse=True, key=lambda ch: ch[0])
 
-        print("gene after sort:", self.gene)
+        # print("gene after sort:", self.gene)
 
         for (a, aX, aY) in self.gene:
-            for point in temp:
-                (x, y) = point
-                distance = math.sqrt(abs(aX-x)**2 + abs(aY-y)**2)
-                if distance <= RADIUS[a]:
-                    temp = [p for p in temp if p != point]
-                    coverdPoints += 1
+            if(a != 0):
+                for point in temp:
+                    (x, y) = point
+                    distance = math.sqrt(abs(aX-x)**2 + abs(aY-y)**2)
+                    if distance <= RADIUS[a]:
+                        temp = [p for p in temp if p != point]
+                        coverdPoints += 1
 
         return coverdPoints
 
@@ -132,7 +126,7 @@ class Individual(object):
             totalCost += COSTS[a]
 
         fit = self.u() - totalCost
-        print("fit:", fit)
+        # print("fit:", fit)
         return fit
 
 
@@ -143,57 +137,61 @@ if __name__ == '__main__':
         for y in range(GRID_SIZE):
             points.append((x, y))
 
-    gene = [(2, 0, 0), (2, 3, 3), (0, 0, 0), (0, 0, 0)]
-    indiv = Individual(gene)
 
-    # # First Generation
-    # for _ in range(POPULATION_SIZE):
-    #     gnome = Individual.create_gnome()
-    #     indiv = Individual(gnome)
-    #     population.append(indiv)
+    # First Generation
+    for _ in range(POPULATION_SIZE):
+        gnome = Individual.create_gnome()
+        indiv = Individual(gnome)
+        population.append(indiv)
 
-    # while not found:
+    while not found:
 
-    #     # max generation terminate condition
-    #     if generation > MAX_GENERATION:
-    #         print("---- can't find ----")
-    #         break
+        # max generation terminate condition
+        if generation > MAX_GENERATION or limit == MAX_LIMIT:
+            break
 
-    #     population = sorted(population, reverse=True, key=lambda x: x.fitness)
+        population = sorted(population, reverse=True, key=lambda x: x.fitness)
 
-    #     best_fits.append(population[0].fitness)
-    #     avg_fits.append(np.mean([p.fitness for p in population]))
+        if best_answer == population[0].fitness:
+            limit += 1
+        else:
+            best_answer = population[0].fitness
 
-    #     print("generation:", generation, " best fit:", population[0].fitness)
+        best_fits.append(population[0].fitness)
+        avg_fits.append(np.mean([p.fitness for p in population]))
 
-    #     if population[0].fitness == len(CAN_POS) * 10:
-    #         found = True
-    #         break
+        print("generation:", generation, " best fit:", population[0].fitness)
 
-    #     new_generation = []
+        # solution founded condition
 
-    #     # selection pressure with coefficient 70% of best
-    #     index = int(POPULATION_SIZE * 0.7)
+        besstParent = population[0]
+        new_generation = []
 
-    #     for _ in range(POPULATION_SIZE):
+        for _ in range(POPULATION_SIZE):
 
-    #         # parent selection with Roulette Wheel method
-    #         (parent1, parent2) = Individual.rouletteWheelSelection(
-    #             population[:index])
-    #         child = parent1.crossOver(parent2)
+            # parent selection with Roulette Wheel method
+            parent1 = Individual.tournomentSelection(population)
+            parent2 = Individual.tournomentSelection(population)
 
-    #         child.mutate()
+            child = parent1.crossOver(parent2)
 
-    #         new_generation.append(child)
+            child.mutate()
 
-    #     population = new_generation
-    #     generation += 1
+            new_generation.append(child)
 
-    # if found:
-    #     print("generation : ", generation, "       ",
-    #           population[0].chromosome[0:10],  population[0].fitness)
-    #     plotResult()
+        new_generation = sorted(
+            new_generation, reverse=True, key=lambda x: x.fitness)
 
-    # duration = time.time() - start
-    # print("minute:", (duration)//60)
-    # print("second:", (duration) % 60)
+        new_generation.insert(len(new_generation)-1, besstParent)
+
+        population = new_generation
+        generation += 1
+
+    print("generation : ", generation-1, "       ",
+          population[0].gene[0:10],  population[0].fitness)
+
+    # plotResult()
+
+    duration = time.time() - start
+    print("minute:", (duration)//60)
+    print("second:", (duration) % 60)
