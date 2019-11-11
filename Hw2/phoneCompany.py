@@ -21,7 +21,7 @@ POPULATION_SIZE = 50
 TOURNAMENT_SIZE = 10
 MAX_GENERATION = 1000
 MAX_LIMIT = 5
-METHOD = "uniform"
+METHOD = "arithmetic"
 
 GRID_SIZE = 50
 S = 5           # maximum number of antennas
@@ -29,8 +29,8 @@ K = 5           # antenna types
 COSTS = [0, 0.5, 1, 3, 5, 7, 10, 12, 15, 20, 24]
 RADIUS = [0, 2, 5, 8, 10, 15, 20, 25, 30, 32, 40]
 
-COLORS = ['red', 'blue', 'green', 'purple', 'orange', 'black', "#006600", "#9999ff", "#ff5050", "#996633",
-          "#006699", "#669999", "#993333"]
+COLORS = ['red', 'blue', 'green', 'purple', 'orange',"#006600", "#9999ff", "#ff5050", "#996633",
+          "#006699", "#669999", "#993333", 'black']
 
 SCALE = 8
 
@@ -218,7 +218,7 @@ class Individual(object):
                 if distance <= RADIUS[a]:
                     temp = [p for p in temp if p != point]
                     coverdPoints += 1
-        
+
         total += coverdPoints
 
     def u2(self):
@@ -297,9 +297,12 @@ if __name__ == '__main__':
         for _ in range(POPULATION_SIZE):
 
             # parent selection with tournomant selection
-            parent1 = Individual.tournomentSelection(population)
-            parent2 = Individual.tournomentSelection(population)
-
+            # parent1 = Individual.tournomentSelection(population)
+            # parent2 = Individual.tournomentSelection(population)
+            
+            # parent selection with  rouletteWheel
+            (parent1, parent2) = Individual.rouletteWheelSelection(population)
+            
             (child1, child2) = parent1.crossOver(parent2)
 
             child1.mutate()
