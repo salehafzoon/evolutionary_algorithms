@@ -16,17 +16,17 @@ points = []
 best_answer = 0
 limit = 0
 
-POPULATION_SIZE = 400
+POPULATION_SIZE = 100
 TOURNAMENT_SIZE = 10
 MAX_GENERATION = 1000
 MAX_LIMIT = 10
-METHOD = "onePoint"
+METHOD = "arithmetic"
 
-GRID_SIZE = 20
-S = 5           # maximum number of antennas
-K = 3           # anten types
-COSTS = [0, 2, 5, 10]
-RADIUS = [0, 2, 5, 10]
+GRID_SIZE = 30
+S = 4           # maximum number of antennas
+K = 3           # antenna types
+COSTS = [0, 0.5, 1, 3, 5]
+RADIUS = [0, 2, 5, 8, 10]
 
 COLORS = ['red', 'blue', 'green', 'purple', 'orange']
 SCALE = 10
@@ -37,11 +37,9 @@ Y = -10
 def drawAnswer():
 
     t = turtle.Turtle()
-    # t.penup()
-    # t.setpos(X * SCALE, Y * SCALE)
-    # t.pendown()
-    t.forward(GRID_SIZE * SCALE)  # Forward turtle by 100 units
-    t.left(90)  # Turn turtle by 90 degree
+    t.pensize(4)
+    t.forward(GRID_SIZE * SCALE)
+    t.left(90)
     t.forward(GRID_SIZE * SCALE)
     t.left(90)
     t.forward(GRID_SIZE * SCALE)
@@ -50,12 +48,11 @@ def drawAnswer():
     t.left(90)
 
     for (a, x, y) in population[0].gene:
-        clr = random.choice(COLORS)
-        t.color(clr)
+        t.color(COLORS[a])
         t.penup()
         t.setpos(x * SCALE, y * SCALE)
         t.pendown()
-        t.circle(a * SCALE)
+        t.circle(RADIUS[a] * SCALE)
 
     input()
 
@@ -94,6 +91,7 @@ class Individual(object):
         for _ in range(S-antNumber):
             gene.append((0, 0, 0))
 
+        random.shuffle(gene)
         return gene
 
     @classmethod
@@ -110,7 +108,7 @@ class Individual(object):
         for chrom in self.gene:
             mutateProb = random.random()
             (a, x, y) = chrom
-            if(mutateProb <= 0.):
+            if(mutateProb <= 0.05):
                 index = self.gene.index(chrom)
                 mutateProb = random.random()
                 if(mutateProb <= 0.33):
@@ -126,6 +124,12 @@ class Individual(object):
     def crossOver(self, parent2):
 
         child = []
+        if METHOD == "onePoint":
+            size = len(self.gene)
+            child = self.gene[:int(size/2)]
+            for i in range(int(size/2), size):
+                child.append(parent2.gene[i])
+
         if METHOD == "uniform":
             for c1, c2 in zip(self.gene, parent2.gene):
                 prob = random.random()
@@ -134,11 +138,14 @@ class Individual(object):
                 else:
                     child.append(c2)
 
-        if METHOD == "onePoint":
-            size = len(self.gene)
-            child = self.gene[:int(size/2)]
-            for i in range(int(size/2), size):
-                child.append(parent2.gene[i])
+        if METHOD == "arithmetic":
+            for c1, c2 in zip(self.gene, parent2.gene):
+                bound = random.random()
+                prob = random.random()
+                if(prob > bound):
+                    child.append(c1)
+                else:
+                    child.append(c2)
 
         return Individual(child)
 
@@ -233,9 +240,8 @@ if __name__ == '__main__':
     print("generation : ", generation, "       ",
           population[0].gene[0:10],  population[0].fitness)
 
-    drawAnswer()
-
     plotResult()
+    drawAnswer()
 
     duration = time.time() - start
     print("minute:", (duration)//60)
