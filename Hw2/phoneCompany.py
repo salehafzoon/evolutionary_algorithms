@@ -4,6 +4,7 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 import turtle
+import thread
 
 start = time.time()
 generation = 1
@@ -16,22 +17,24 @@ points = []
 best_answer = 0
 limit = 0
 
-POPULATION_SIZE = 100
+POPULATION_SIZE = 50
 TOURNAMENT_SIZE = 10
 MAX_GENERATION = 1000
-MAX_LIMIT = 10
-METHOD = "arithmetic"
+MAX_LIMIT = 5
+METHOD = "uniform"
 
-GRID_SIZE = 30
-S = 4           # maximum number of antennas
-K = 3           # antenna types
-COSTS = [0, 0.5, 1, 3, 5]
-RADIUS = [0, 2, 5, 8, 10]
+GRID_SIZE = 50
+S = 5           # maximum number of antennas
+K = 5           # antenna types
+COSTS = [0, 0.5, 1, 3, 5, 7, 10, 12, 15, 20, 24]
+RADIUS = [0, 2, 5, 8, 10, 15, 20, 25, 30, 32, 40]
 
-COLORS = ['red', 'blue', 'green', 'purple', 'orange']
-SCALE = 10
-X = -10
-Y = -10
+COLORS = ['red', 'blue', 'green', 'purple', 'orange', 'black', "#006600", "#9999ff", "#ff5050", "#996633",
+          "#006699", "#669999", "#993333"]
+
+SCALE = 8
+
+totalCoverPoints = 0
 
 
 def drawAnswer():
@@ -67,6 +70,10 @@ def plotResult():
     plt.show()
 
 
+def printHi():
+    print('hi')
+
+
 class Individual(object):
 
     def __init__(self, gene):
@@ -77,8 +84,10 @@ class Individual(object):
     def create_gnome(self):
         gene = []
 
-        # initail antens
+        # select antenna number to init
         antNumber = random.choice(list(range(S))) + 1
+
+        # randomly placing antenna in grid
         for _ in range(antNumber):
             x = random.choice(list(range(GRID_SIZE)))
             y = random.choice(list(range(GRID_SIZE)))
@@ -87,7 +96,7 @@ class Individual(object):
                           x, y)
             gene.append(chromosome)
 
-        # set rest of anten list as empty
+        # set rest of antenna list as empty
         for _ in range(S-antNumber):
             gene.append((0, 0, 0))
 
@@ -104,6 +113,41 @@ class Individual(object):
 
         return (best)
 
+    @classmethod
+    def rouletteWheelSelection(self, population):
+
+        fitness_sum = 0
+        parents = []
+        min_fit = -100
+        fitnesses = []
+
+        for individual in population:
+            fitnesses.append(individual.fitness)
+
+        min_fit = abs(min(fitnesses))
+
+        for i in range(len(fitnesses)):
+            fitnesses[i] += min_fit + 10
+
+        fitness_sum = sum(fitnesses)
+        filled = 0
+
+        for i in range(len(fitnesses)):
+
+            fitnesses[i] = float(filled + fitnesses[i] / float(fitness_sum))
+            filled = fitnesses[i]
+
+        for j in range(2):
+            pointer = random.random()
+
+            for i in range(len(fitnesses)):
+
+                if pointer < fitnesses[i]:
+                    parents.append(population[i])
+                    break
+
+        return parents
+
     def mutate(self):
         for chrom in self.gene:
             mutateProb = random.random()
@@ -111,6 +155,8 @@ class Individual(object):
             if(mutateProb <= 0.05):
                 index = self.gene.index(chrom)
                 mutateProb = random.random()
+
+                # with equal probablity change one of triple index
                 if(mutateProb <= 0.33):
                     a = random.choice(list(range(K))) + 1
                 elif(mutateProb <= 0.66):
@@ -123,40 +169,75 @@ class Individual(object):
 
     def crossOver(self, parent2):
 
-        child = []
+        child1 = []
+        child2 = []
+
         if METHOD == "onePoint":
             size = len(self.gene)
-            child = self.gene[:int(size/2)]
+            child1 = self.gene[:int(size/2)]
             for i in range(int(size/2), size):
-                child.append(parent2.gene[i])
+                child1.append(parent2.gene[i])
+
+            child2 = self.gene[int(size/2):]
+            for i in range(int(size/2)):
+                child2.append(parent2.gene[i])
 
         if METHOD == "uniform":
             for c1, c2 in zip(self.gene, parent2.gene):
                 prob = random.random()
                 if(prob > 0.5):
-                    child.append(c1)
+                    child1.append(c1)
+                    child2.append(c2)
+
                 else:
-                    child.append(c2)
+                    child1.append(c2)
+                    child2.append(c1)
 
         if METHOD == "arithmetic":
             for c1, c2 in zip(self.gene, parent2.gene):
                 bound = random.random()
                 prob = random.random()
                 if(prob > bound):
-                    child.append(c1)
-                else:
-                    child.append(c2)
+                    child1.append(c1)
+                    child2.append(c2)
 
-        return Individual(child)
+                else:
+                    child1.append(c2)
+                    child2.append(c1)
+
+        return (Individual(child1), Individual(child2))
+
+    def coverCount(self, index, total):
+        coverdPoints = 0
+        temp = points
+        (a, aX, aY) = self.gene[index]
+        if(a != 0):
+            for point in temp:
+                (x, y) = point
+                distance = math.sqrt(abs(aX-x)**2 + abs(aY-y)**2)
+                if distance <= RADIUS[a]:
+                    temp = [p for p in temp if p != point]
+                    coverdPoints += 1
+        
+        total += coverdPoints
+
+    def u2(self):
+
+        total = 0
+        for i in range(len(self.gene)):
+            thread.start_new_thread(self.coverCount, (i, total))
+
+        print("total points:", total)
+
+        return total
 
     def u(self):
 
         coverdPoints = 0
         temp = points
 
+        # sort antennas by radius size
         self.gene = sorted(self.gene, reverse=True, key=lambda ch: ch[0])
-
-        # print("gene after sort:", self.gene)
 
         for (a, aX, aY) in self.gene:
             if(a != 0):
@@ -175,7 +256,6 @@ class Individual(object):
             totalCost += COSTS[a]
 
         fit = self.u() - totalCost
-        # print("fit:", fit)
         return fit
 
 
@@ -195,7 +275,7 @@ if __name__ == '__main__':
     while not found:
 
         # max generation terminate condition
-        if generation > MAX_GENERATION or limit == MAX_LIMIT:
+        if generation == MAX_GENERATION or limit == MAX_LIMIT:
             break
 
         population = sorted(population, reverse=True, key=lambda x: x.fitness)
@@ -211,22 +291,22 @@ if __name__ == '__main__':
 
         print("generation:", generation, " best fit:", population[0].fitness)
 
-        # solution founded condition
-
         besstParent = population[0]
         new_generation = []
 
         for _ in range(POPULATION_SIZE):
 
-            # parent selection with Roulette Wheel method
+            # parent selection with tournomant selection
             parent1 = Individual.tournomentSelection(population)
             parent2 = Individual.tournomentSelection(population)
 
-            child = parent1.crossOver(parent2)
+            (child1, child2) = parent1.crossOver(parent2)
 
-            child.mutate()
+            child1.mutate()
+            child2.mutate()
 
-            new_generation.append(child)
+            new_generation.append(child1)
+            new_generation.append(child2)
 
         new_generation = sorted(
             new_generation, reverse=True, key=lambda x: x.fitness)
