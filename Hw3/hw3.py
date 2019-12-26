@@ -17,13 +17,13 @@ generation = 1
 population = []
 found = False
 
-MAX_GENERATION = 3000
-POPULATION_SIZE = 100
+MAX_GENERATION = 600
+POPULATION_SIZE = 400
 N = 2
 ALPHA = 418.9829
  
 MUTATION_MODE = CASE2
-XOVER_METHOD = LOCAL_DISC
+XOVER_METHOD = GLOBAL_INT
 
 class Individual(object):
 
@@ -62,9 +62,9 @@ class Individual(object):
         if(MUTATION_MODE == CASE2) :
             for i in range(len(sig)):
                 var = t * gauss(0,1)
-                sig[i] *= math.exp(const + var)
+                sig[i] = round(sig[i] *math.exp(const + var) ,8)
             for i in range(len(x)):
-                x[i] += sig[i] * gauss(0,1)
+                x[i] = round(x[i] + sig[i] * gauss(0,1) ,8)
         
         # change our chromosome after mutate
         self.chromosome = (x,sig)
@@ -76,15 +76,14 @@ class Individual(object):
 
         child = None
         
-        if XOVER_METHOD == LOCAL_DISC:
+        if XOVER_METHOD == LOCAL_DISC or  XOVER_METHOD == LOCAL_INT:
             parent1 = random.choice(list(population))
             parent2 = random.choice(list(population))
-
             # print(parent1.chromosome[0],parent2.chromosome[0])
             
             xP1 = parent1.chromosome[0]
             xP2 = parent2.chromosome[0]
-            
+
             sigP1 = parent1.chromosome[1]
             sigP2 = parent2.chromosome[1]
 
@@ -93,13 +92,45 @@ class Individual(object):
 
             # randomly selection x from parents
             for x1, x2 in zip(xP1, xP2):
-                child_x.append(random.choice([x1,x2]))
+                if XOVER_METHOD == LOCAL_DISC:
+                    child_x.append(random.choice([x1,x2]))
+                else: 
+                    child_x.append( (x1+x2)/2 )
 
             # randomly selection sigma from parents
             for sig1, sig2 in zip(sigP1, sigP2):
-                child_sig.append(random.choice([sig1,sig2]))
+                if XOVER_METHOD == LOCAL_DISC:
+                    child_sig.append(random.choice([sig1,sig2]))
+                else :
+                     child_sig.append( (sig1+sig2)/2 )
+        
+        elif XOVER_METHOD == GLOBAL_DISC or  XOVER_METHOD == GLOBAL_INT:
+            child_x = []
+            child_sig = []
 
-            child = (child_x,child_sig)
+            for i in range(N):
+                parent1 = random.choice(list(population))
+                parent2 = random.choice(list(population))
+                # print(parent1.chromosome[0],parent2.chromosome[0])
+                
+                x1 = parent1.chromosome[0][i]
+                x2 = parent2.chromosome[0][i]
+
+                sig1 = parent1.chromosome[1][i]
+                sig2 = parent2.chromosome[1][i]
+
+                if XOVER_METHOD == GLOBAL_DISC:
+                    child_x.append(random.choice([x1,x2]))
+                else: 
+                    child_x.append( (x1+x2)/2 )
+
+                # randomly selection sigma from parents
+                if XOVER_METHOD == GLOBAL_INT:
+                    child_sig.append(random.choice([sig1,sig2]))
+                else :
+                    child_sig.append( (sig1+sig2)/2 )
+        
+        child = (child_x,child_sig)
         
         return Individual(child)
 
@@ -108,7 +139,7 @@ class Individual(object):
         fitness = 0
         x = self.chromosome[0]
         for i in range ( len(x)):
-            f_array.append( - x[i]*math.sin(math.sqrt(math.fabs(x[i]))) )
+            f_array.append( round(- x[i]*math.sin(math.sqrt(math.fabs(x[i]))) ,10))
     
         for f in f_array :
             fitness +=f
@@ -146,7 +177,13 @@ if __name__ == '__main__':
             break
         
         population = sorted(population, key=lambda x: x.fitness)
-        print("generation:", generation, " best fit:", population[0].fitness,population[0].f_array)
+        
+        # for ind in population[0:3]:
+        #     print(ind.f_array,ind.chromosome[0])
+        # print("----------------")    
+        
+        if population[0].fitness == 0 :
+            break
 
         new_generation = []
         
@@ -162,11 +199,9 @@ if __name__ == '__main__':
         population = new_generation[0:POPULATION_SIZE]
         generation += 1
 
-    generation -= 1
-    print("generation : ", generation, "       ",
-          population[0].chromosome[0], population[0].fitness, population[0].fitness)
+    print("generation :", generation, " x =",
+          population[0].chromosome[0], " f =",population[0].fitness)
 
 
     duration = time.time() - start
-    print("minute:", (duration)//60)
-    print("second:", (duration) % 60)
+    print("time :", round((duration) % 60 , 4) ," sec")
