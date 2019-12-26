@@ -3,6 +3,7 @@ import time
 import math
 import matplotlib.pyplot as plt
 import numpy as np
+from random import gauss
 
 MAX_VAL = 500
 CASE1 = "CASE1"
@@ -16,9 +17,9 @@ generation = 1
 population = []
 found = False
 
-MAX_GENERATION = 300
+MAX_GENERATION = 3000
 POPULATION_SIZE = 100
-N = 5
+N = 2
 ALPHA = 418.9829
  
 MUTATION_MODE = CASE2
@@ -41,9 +42,9 @@ class Individual(object):
             # x.append(420.9687)
         
         # init random sigma from (0,1)
-        if SIGMA_MODE == 'CASE1' :
+        if MUTATION_MODE == 'CASE1' :
             sig.append(random.random())
-        elif SIGMA_MODE == 'CASE2' :
+        elif MUTATION_MODE == 'CASE2' :
             for _ in range(N):
                 sig.append(random.random())
 
@@ -53,10 +54,22 @@ class Individual(object):
     def mutate(self):
         x = self.chromosome[0]
         sig = self.chromosome[1]
-        # calcute t*N(0,1)
-        const = (1/math.sqrt(2*N)) *
-        if(MUTATION_MODE == CASE2) :
 
+        # calcute t*N(0,1)
+        t = (1/math.sqrt(2*N))
+        const = t * gauss(0,1)
+
+        if(MUTATION_MODE == CASE2) :
+            for i in range(len(sig)):
+                var = t * gauss(0,1)
+                sig[i] *= math.exp(const + var)
+            for i in range(len(x)):
+                x[i] += sig[i] * gauss(0,1)
+        
+        # change our chromosome after mutate
+        self.chromosome = (x,sig)
+        # calculate fitness again
+        (self.f_array,self.fitness) = self.call_fitness()
     
     @classmethod
     def crossOver(self, population):
@@ -67,7 +80,7 @@ class Individual(object):
             parent1 = random.choice(list(population))
             parent2 = random.choice(list(population))
 
-            print(parent1.chromosome[0],parent2.chromosome[0])
+            # print(parent1.chromosome[0],parent2.chromosome[0])
             
             xP1 = parent1.chromosome[0]
             xP2 = parent2.chromosome[0]
@@ -110,7 +123,6 @@ def initial_population():
         indiv = Individual(chrom)
         population.append(indiv)
 
-    
 
 if __name__ == '__main__':
     start = time.time()
@@ -118,46 +130,43 @@ if __name__ == '__main__':
     # First Generation
     initial_population()
 
-    for ind in population[0:2]:
+    # for ind in population[0:2]:
         # print("parent",ind.fitness , ind.f_array)
         # print("parent",ind.chromosome[0])
         
     # child = Individual.crossOver(population[0:2])
     # print("child",child.chromosome[0])
+    # child.mutate()
+    # print("mutated child",child.chromosome[0])
+    
+    while not found:
 
-    # while not found:
-
-    #     # max generation terminate condition
-    #     if generation == MAX_GENERATION :
-    #         break
+        # max generation terminate condition
+        if generation == MAX_GENERATION :
+            break
         
-    #     population = sorted(population, reverse=True, key=lambda x: x.fitness)
-    #     print("generation:", generation, " best fit:", population[0].fitness)
+        population = sorted(population, key=lambda x: x.fitness)
+        print("generation:", generation, " best fit:", population[0].fitness,population[0].f_array)
 
-    #     new_generation = []
-    #     for _ in range(POPULATION_SIZE):
+        new_generation = []
+        
+        for _ in range(POPULATION_SIZE * 7):
            
-    #         child1 = Individual.crossOver(XOVER_METHOD,population)
+            child = Individual.crossOver(population)
+            child.mutate()
+            new_generation.append(child)
+        
+        new_generation = sorted(
+            new_generation, key=lambda x: x.fitness)
+   
+        population = new_generation[0:POPULATION_SIZE]
+        generation += 1
 
-    # #         child1.mutate()
-    # #         child2.mutate()
-
-    # #         new_generation.append(child1)
-    # #         new_generation.append(child2)
-
-    # #     new_generation = sorted(
-    # #         new_generation, reverse=True, key=lambda x: x.fitness)
-
-    # #     new_generation.insert(len(new_generation)-1, besstParent)
-
-    # #     population = new_generation
-    # #     generation += 1
-
-    # # generation -= 1
-    # # print("generation : ", generation, "       ",
-    # #       population[0].gene[0:10],  population[0].fitness)
+    generation -= 1
+    print("generation : ", generation, "       ",
+          population[0].chromosome[0], population[0].fitness, population[0].fitness)
 
 
-    # # duration = time.time() - start
-    # # print("minute:", (duration)//60)
-    # # print("second:", (duration) % 60)
+    duration = time.time() - start
+    print("minute:", (duration)//60)
+    print("second:", (duration) % 60)
