@@ -17,13 +17,21 @@ generation = 1
 population = []
 found = False
 
-MAX_GENERATION = 600
+MAX_GENERATION = 400
 POPULATION_SIZE = 400
-N = 2
+N = 3
 ALPHA = 418.9829
  
 MUTATION_MODE = CASE2
-XOVER_METHOD = GLOBAL_INT
+XOVER_METHOD = LOCAL_DISC
+
+def truncate(f, n):
+    '''Truncates/pads a float f to n decimal places without rounding'''
+    s = '{}'.format(f)
+    if 'e' in s or 'E' in s:
+        return '{0:.{1}f}'.format(f, n)
+    i, p, d = s.partition('.')
+    return '.'.join([i, (d+'0'*n)[:n]])
 
 class Individual(object):
 
@@ -62,15 +70,30 @@ class Individual(object):
         if(MUTATION_MODE == CASE2) :
             for i in range(len(sig)):
                 var = t * gauss(0,1)
-                sig[i] = round(sig[i] *math.exp(const + var) ,8)
+                sig[i] *= math.exp(const + var)
             for i in range(len(x)):
-                x[i] = round(x[i] + sig[i] * gauss(0,1) ,8)
-        
+                # print("sig:",sig[i])
+                # print("sig* n:",sig[i] * gauss(0,1))
+
+                # print("x[i] before:",x[i])
+                x[i] += sig[i] * gauss(0,1)
+                if x[i] > 500 :
+                    x[i] = 500
+                if x[i] < 0 :
+                    x[i]= 0
+                # print("x[i]:",x[i])
+                # x[i] = float(truncate(x[i], 4))
+                x[i] = round(x[i], 4)
+                
+
         # change our chromosome after mutate
         self.chromosome = (x,sig)
+        
+        # print("before:",self.fitness)
         # calculate fitness again
         (self.f_array,self.fitness) = self.call_fitness()
-    
+        # print("after:",self.fitness)
+
     @classmethod
     def crossOver(self, population):
 
@@ -139,12 +162,13 @@ class Individual(object):
         fitness = 0
         x = self.chromosome[0]
         for i in range ( len(x)):
-            f_array.append( round(- x[i]*math.sin(math.sqrt(math.fabs(x[i]))) ,10))
+            # f_array.append( round(- x[i]*math.sin(math.sqrt(math.fabs(x[i]))) ,10))
+            f_array.append(- x[i]*math.sin(math.sqrt(math.fabs(x[i]))))
     
         for f in f_array :
             fitness +=f
 
-        fitness = float(fitness) + ALPHA*len(x)
+        fitness = round(float(fitness) + ALPHA*len(x),8)
 
         return (f_array , fitness)
 
@@ -156,20 +180,25 @@ def initial_population():
 
 
 if __name__ == '__main__':
+
+    # fitness = 0
+    # f_array = []
+    # x = [404.97441816,-858.9798881]
+    # for i in range ( len(x)):
+    #     f_array.append(- x[i]*math.sin(math.sqrt(math.fabs(x[i]))))
+
+    # for f in f_array :
+    #     fitness +=f
+
+    # fitness = float(fitness) + ALPHA*len(x)
+
+    # print(fitness)
+
     start = time.time()
 
     # First Generation
     initial_population()
-
-    # for ind in population[0:2]:
-        # print("parent",ind.fitness , ind.f_array)
-        # print("parent",ind.chromosome[0])
-        
-    # child = Individual.crossOver(population[0:2])
-    # print("child",child.chromosome[0])
-    # child.mutate()
-    # print("mutated child",child.chromosome[0])
-    
+ 
     while not found:
 
         # max generation terminate condition
@@ -179,24 +208,34 @@ if __name__ == '__main__':
         population = sorted(population, key=lambda x: x.fitness)
         
         # for ind in population[0:3]:
-        #     print(ind.f_array,ind.chromosome[0])
-        # print("----------------")    
+        #     print(ind.fitness,ind.chromosome[0])
+        # print("------pop--------")
         
         if population[0].fitness == 0 :
             break
-
+        
         new_generation = []
         
-        for _ in range(POPULATION_SIZE * 7):
+        for _ in range(POPULATION_SIZE):
            
             child = Individual.crossOver(population)
-            child.mutate()
-            new_generation.append(child)
+            for _ in range(7):
+                child.mutate()
+                new_generation.append(child)
         
         new_generation = sorted(
             new_generation, key=lambda x: x.fitness)
-   
+    
+        # for ind in new_generation[0:3]:
+        #     print(ind.fitness,ind.chromosome[0])
+        # print("------new gen--------")
+
         population = new_generation[0:POPULATION_SIZE]
+
+        # for ind in new_generation[0:3]:
+        #     print(ind.fitness,ind.chromosome[0])
+        # print("------new pop--------")
+
         generation += 1
 
     print("generation :", generation, " x =",
@@ -204,4 +243,4 @@ if __name__ == '__main__':
 
 
     duration = time.time() - start
-    print("time :", round((duration) % 60 , 4) ," sec")
+    print("time :", (duration)//60 ,"min,",round((duration) % 60 , 4) ,"sec")
