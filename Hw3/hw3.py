@@ -22,14 +22,14 @@ generation = 1
 population = []
 found = False
 
-MAX_GENERATION = 50
-POPULATION_SIZE = 100
-N = 2
+MAX_GENERATION = 40
+POPULATION_SIZE = 50
+N = 10
 ALPHA = 418.9829
 
 MUTATION_MODE = CASE2
 XOVER_METHOD = LOCAL_DISC
-SURVIVOR_SEL_TYPE = GENERATIONAL
+SURVIVOR_SEL_TYPE = ELITISM
 sigArray = []
 class Individual(object):
 
@@ -219,14 +219,13 @@ def ga():
         
         new_generation = []
         
-        for _ in range(POPULATION_SIZE):
+        for _ in range(POPULATION_SIZE *7):
            
             child = Individual.crossOver(population)
-            for _ in range(7):
-                child.mutate()
-                if(child.valid) :
-                    new_generation.append(child)
-        
+            child.mutate()
+            if(child.valid) :
+                new_generation.append(child)
+    
         if(SURVIVOR_SEL_TYPE == ELITISM):
             new_generation.extend(population)
 
