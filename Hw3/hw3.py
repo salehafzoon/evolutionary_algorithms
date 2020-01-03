@@ -28,9 +28,25 @@ N = 10
 ALPHA = 418.9829
 
 MUTATION_MODE = CASE2
-XOVER_METHOD = LOCAL_DISC
+XOVER_METHOD = GLOBAL_INT
 SURVIVOR_SEL_TYPE = ELITISM
 sigArray = []
+best_fits = []
+avg_fits = []
+
+def plotResult():
+    # print(best_fits)
+    print(avg_fits)
+    
+    plt.plot(list(range(generation)), best_fits, 'go-',
+             label='best of generations', linewidth=2)
+    plt.show()
+
+    plt.plot(list(range(generation)), avg_fits, 'bo-',
+             label='avg of generations', linewidth=2)
+    plt.show()
+
+
 class Individual(object):
 
     def __init__(self, chromosome):
@@ -194,7 +210,11 @@ def ga():
     # First Generation
     global generation
     global population
-
+    global best_fits
+    global avg_fits
+    best_fits = []
+    avg_fits = []
+    
     if MUTATION_MODE == NON_ADAPTIVE :
         Individual.initConstantSigmas()
         
@@ -211,9 +231,11 @@ def ga():
         
         population = sorted(population, key=lambda x: x.fitness)
         
+        best_fits.append(population[0].fitness)
+        avg_fits.append(np.mean([p.fitness for p in population]))
+
         # print("generation:",generation,population[0].fitness,population[0].chromosome[0][0:3])
         
-        # print(len(population))
         if population[0].fitness == 0 :
             break
         
@@ -237,31 +259,33 @@ def ga():
         generation += 1
 
     # print(population[0].fitness,population[0].f_array,"\n")
+    plotResult()
     print(population[0].fitness)
     return population[0].fitness
 
 if __name__ == '__main__':
 
-    start = time.time()
+    ga()
+    # start = time.time()
 
-    fitnesses = []
+    # fitnesses = []
 
-    for _ in range(10):
+    # for _ in range(10):
 
-        fitnesses.append( ga() )
+    #     fitnesses.append( ga() )
 
-    print("fitnesses:",fitnesses)
+    # print("fitnesses:",fitnesses)
 
-    print("average:",np.mean(fitnesses))
-    print("variance:",math.sqrt(np.var(fitnesses)))
+    # print("average:",np.mean(fitnesses))
+    # print("variance:",math.sqrt(np.var(fitnesses)))
 
-    # print("generation :", generation, " x =",
-    #       population[0].chromosome[0], " fitness =",population[0].fitness)
+    # # print("generation :", generation, " x =",
+    # #       population[0].chromosome[0], " fitness =",population[0].fitness)
     
-    # for i in range(len(population[0].f_array)):
-    #     population[0].f_array[i] += ALPHA
+    # # for i in range(len(population[0].f_array)):
+    # #     population[0].f_array[i] += ALPHA
     
-    # print("f_array:", population[0].f_array)
+    # # print("f_array:", population[0].f_array)
 
-    # duration = time.time() - start
-    # print("time :", (duration)//60 ,"min,",round((duration) % 60 , 4) ,"sec")
+    # # duration = time.time() - start
+    # # print("time :", (duration)//60 ,"min,",round((duration) % 60 , 4) ,"sec")
